@@ -11,4 +11,10 @@ Click 'Bind to A1'
 
 Then click 'Add handler to A1'
 
-The error will be shown in the text string below the buttons
+No error will appear as if nothing happened.
+
+If you click 'Add handler to document overall'
+
+You will see that 'addHandlerAsync' has invalid parameters for this one.
+
+All Excel logic is in the ./services/excel.service.ts directory

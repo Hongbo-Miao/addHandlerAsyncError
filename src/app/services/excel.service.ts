@@ -32,9 +32,21 @@ export class ExcelService {
         });
     }
 
-    createHandler(): Promise<Office.AsyncResultStatus> {
+    createHandlerOnA1(): Promise<Office.AsyncResultStatus> {
         return new Promise((resolve, reject) => {
-            this.workbook.bindings.document.addHandlerAsync(Office.EventType.BindingDataChanged, this.respondToDataChange, undefined, (result: Office.AsyncResult) => {
+            Office.select("bindings#addinBinding").addHandlerAsync(Office.EventType.BindingDataChanged, this.respondToDataChange, undefined, (result: Office.AsyncResult) => {
+                if(result.status === Office.AsyncResultStatus.Failed) {
+                    reject(result.status);
+                } else {
+                    resolve(result.status);
+                }
+            });
+        })
+    }
+
+    createHandlerOnDoc(): Promise<Office.AsyncResultStatus> {
+        return new Promise((resolve, reject) => {
+            this.workbook.addHandlerAsync(Office.EventType.BindingDataChanged, this.respondToDataChange, undefined, (result: Office.AsyncResult) => {
                 if(result.status === Office.AsyncResultStatus.Failed) {
                     reject(result.status);
                 } else {
