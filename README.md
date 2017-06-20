@@ -11,10 +11,6 @@ Click 'Bind to A1'
 
 Then click 'Add handler to A1'
 
-No error will appear as if nothing happened.
+It will supposedly successfully create the handler.  However, if data is changed in cell A1, the event never triggers the handler function.
 
-If you click 'Add handler to document overall'
-
-You will see that 'addHandlerAsync' has invalid parameters for this one.
-
-All Excel logic is in the ./services/excel.service.ts directory
+If you click 'trigger communication from service', you will see the communication of 'data change' that is supposed to be sent when data is changed in the binding.

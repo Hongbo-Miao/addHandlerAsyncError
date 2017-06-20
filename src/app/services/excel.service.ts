@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { IOfficeResult  } from './ioffice-result';
+import { Subject }    from 'rxjs/Subject';
 
 @Injectable()
 export class ExcelService { 
@@ -8,10 +9,15 @@ export class ExcelService {
     private namedItemName: string = "'Sheet1'!A1";
     private binding: Office.MatrixBinding;
 
+    // Observable parameter change sources
+    private inputParameterChange = new Subject<number>();
+
+    inputParameterChanged$ = this.inputParameterChange.asObservable();
+
     constructor() { }
 
-    respondToDataChange(eventArgs: any) {
-        // Do something
+    changeInputParameter(eventArgs: any) {
+        this.inputParameterChange.next(0);
     }
 
     bindToWorkBook(): Promise<IOfficeResult> {
@@ -32,28 +38,28 @@ export class ExcelService {
         });
     }
 
-    createHandlerOnA1(): Promise<Office.AsyncResultStatus> {
+    createHandlerOnA1(): Promise<IOfficeResult> {
         return new Promise((resolve, reject) => {
-            Office.select("bindings#addinBinding").addHandlerAsync(Office.EventType.BindingDataChanged, this.respondToDataChange, undefined, (result: Office.AsyncResult) => {
+            this.workbook.bindings.getByIdAsync(this.bindingName, (result: Office.AsyncResult) => {
                 if(result.status === Office.AsyncResultStatus.Failed) {
-                    reject(result.status);
+                    reject({
+                        error: 'failed to get binding by id'
+                    });
                 } else {
-                    resolve(result.status);
+                    result.value.addHandlerAsync(Office.EventType.BindingDataChanged, this.changeInputParameter, (handlerResult: Office.AsyncResult) => {
+                        if(handlerResult.status === Office.AsyncResultStatus.Failed) {
+                            reject({
+                                error: 'failed to set a handler'
+                            });
+                        } else {
+                            // Successful 
+                            resolve({
+                                success: 'successfully set handler'
+                            });
+                        }
+                    })
                 }
-            });
+            })
         })
     }
-
-    createHandlerOnDoc(): Promise<Office.AsyncResultStatus> {
-        return new Promise((resolve, reject) => {
-            this.workbook.addHandlerAsync(Office.EventType.BindingDataChanged, this.respondToDataChange, undefined, (result: Office.AsyncResult) => {
-                if(result.status === Office.AsyncResultStatus.Failed) {
-                    reject(result.status);
-                } else {
-                    resolve(result.status);
-                }
-            });
-        })
-    }
-
 }

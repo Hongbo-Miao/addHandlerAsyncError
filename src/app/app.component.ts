@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { ExcelService } from './services/excel.service';
 import { IOfficeResult } from './services/ioffice-result';
+import { Subscription } from 'rxjs/Subscription';
 
 @Component({
   selector: 'my-app',
@@ -20,16 +21,24 @@ import { IOfficeResult } from './services/ioffice-result';
   <button 
   class="ms-Button ms-Button--primary" 
   type="submit"
-  (click)="addHandlerToDoc()"
-  ><span class="ms-Button-label">Add handler to document overall</span></button>
+  (click)="triggerCommunicationFromService()"
+  ><span class="ms-Button-label">Trigger communication from service</span></button>
   <p>{{feedback | json}}</p>
   `,
 })
 export class AppComponent  { 
   name = 'Demo of addHandlerAsync Error';
   feedback = '';
+  inputSubscription: Subscription;
 
   constructor(private excelService: ExcelService) {}
+
+  ngOnInit() {
+    this.inputSubscription = this.excelService.inputParameterChanged$
+          .subscribe(eventArgs => {
+            this.feedback = 'data change';
+          });
+  }
 
   onBind(){
     this.excelService
@@ -43,24 +52,17 @@ export class AppComponent  {
 
   addHandler() {
     this.excelService.createHandlerOnA1()
-    .then((result: Office.AsyncResultStatus) => {
-      this.feedback = result.toString();
+    .then((result: any) => {
+      this.feedback = result.success;
       //this.onResult(result);
     }, (result: IOfficeResult) => {
       console.log(result);
-                this.feedback = result.toString();
+                this.feedback = result.error;
               });
   }
 
-  addHandlerToDoc() {
-    this.excelService.createHandlerOnDoc()
-    .then((result: Office.AsyncResultStatus) => {
-      this.feedback = result.toString();
-      //this.onResult(result);
-    }, (result: IOfficeResult) => {
-      console.log(result);
-                this.feedback = result.toString();
-              });
+  triggerCommunicationFromService() {
+    this.excelService.changeInputParameter('balh');
   }
 
 
