@@ -11,6 +11,4 @@ Click 'Bind to A1'
 
 Then click 'Add handler to A1'
 
-It will supposedly successfully create the handler.  However, if data is changed in cell A1, the event never triggers the handler function.
-
-If you click 'trigger communication from service', you will see the communication of 'data change' that is supposed to be sent when data is changed in the binding.
+If you do some sort of change in cell A1, it will trigger Hello World to be printed in it.  However, this handler method changeEvent(eventArgs: any) which is located in src/app/app.component.ts cannot call any methods within the app component.  It can only call native Office JS functions.  Is this expected behavior?  What should I do if I want to get around this?

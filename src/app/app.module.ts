@@ -3,12 +3,10 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppComponent }  from './app.component';
 
-import { ExcelService } from './services/excel.service';
-
 @NgModule({
   imports:      [ BrowserModule ],
   declarations: [ AppComponent ],
   bootstrap:    [ AppComponent ],
-  providers: [ ExcelService ]
+  providers: [ ]
 })
 export class AppModule { }
