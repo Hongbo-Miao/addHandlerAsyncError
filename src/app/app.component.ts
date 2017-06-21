@@ -10,7 +10,7 @@ import { IOfficeResult } from './services/ioffice-result';
   type="submit"
   (click)="onBind()"
   ><span class="ms-Button-label">Bind to A1</span></button>
-  <button 
+  <button O
   class="ms-Button ms-Button--primary" 
   type="submit"
   (click)="addHandler()"
@@ -41,15 +41,38 @@ export class AppComponent  {
     });
   }
 
+  createHandlerOnA1(): Promise<IOfficeResult> {
+        return new Promise((resolve, reject) => {
+            this.workbook.bindings.getByIdAsync(this.bindingName, (result: Office.AsyncResult) => {
+                if(result.status === Office.AsyncResultStatus.Failed) {
+                    reject({
+                        error: 'failed to get binding by id'
+                    });
+                } else {
+                    result.value.addHandlerAsync(Office.EventType.BindingDataChanged, this.changeEvent, (handlerResult: Office.AsyncResult) => {
+                        if(handlerResult.status === Office.AsyncResultStatus.Failed) {
+                            reject({
+                                error: 'failed to set a handler'
+                            });
+                        } else {
+                            // Successful 
+                            resolve({
+                                success: 'successfully set handler'
+                            });
+                        }
+                    })
+                }
+            })
+        })
+    }
+
   addHandler() {
     this.createHandlerOnA1()
     .then((result: any) => {
       this.feedback = result.success;
-      //this.onResult(result);
     }, (result: IOfficeResult) => {
-      console.log(result);
-                this.feedback = result.error;
-              });
+      this.feedback = result.error;
+    });
   }
 
   changeFeedback() {
@@ -86,31 +109,6 @@ export class AppComponent  {
                     }
                 });
         });
-    }
-
-    createHandlerOnA1(): Promise<IOfficeResult> {
-        return new Promise((resolve, reject) => {
-            this.workbook.bindings.getByIdAsync(this.bindingName, (result: Office.AsyncResult) => {
-                if(result.status === Office.AsyncResultStatus.Failed) {
-                    reject({
-                        error: 'failed to get binding by id'
-                    });
-                } else {
-                    result.value.addHandlerAsync(Office.EventType.BindingDataChanged, this.changeEvent, (handlerResult: Office.AsyncResult) => {
-                        if(handlerResult.status === Office.AsyncResultStatus.Failed) {
-                            reject({
-                                error: 'failed to set a handler'
-                            });
-                        } else {
-                            // Successful 
-                            resolve({
-                                success: 'successfully set handler'
-                            });
-                        }
-                    })
-                }
-            })
-        })
     }
 
 
