@@ -20,13 +20,15 @@ import { IOfficeResult } from './services/ioffice-result';
 })
 export class AppComponent  { 
   name = 'Demo of addHandlerAsync Error';
-  feedback = '';
+  private feedback: string;
   private workbook: Office.Document = Office.context.document;
   private bindingName: string = 'addinBinding';
   private namedItemName: string = "'Sheet1'!A1";
   private binding: Office.MatrixBinding;
 
-  constructor() {}
+  constructor() {
+      this.feedback = '';
+  }
 
   ngOnInit() {
   }
@@ -43,26 +45,18 @@ export class AppComponent  {
 
   createHandlerOnA1(): Promise<IOfficeResult> {
         return new Promise((resolve, reject) => {
-            this.workbook.bindings.getByIdAsync(this.bindingName, (result: Office.AsyncResult) => {
-                if(result.status === Office.AsyncResultStatus.Failed) {
-                    reject({
-                        error: 'failed to get binding by id'
-                    });
-                } else {
-                    result.value.addHandlerAsync(Office.EventType.BindingDataChanged, this.changeEvent, (handlerResult: Office.AsyncResult) => {
-                        if(handlerResult.status === Office.AsyncResultStatus.Failed) {
-                            reject({
-                                error: 'failed to set a handler'
-                            });
-                        } else {
-                            // Successful 
-                            resolve({
-                                success: 'successfully set handler'
-                            });
-                        }
-                    })
-                }
-            })
+        this.binding.addHandlerAsync(Office.EventType.BindingDataChanged, this.changeEvent.bind(this), (handlerResult: Office.AsyncResult) => {
+                    if(handlerResult.status === Office.AsyncResultStatus.Failed) {
+                        reject({
+                            error: 'failed to set a handler'
+                        });
+                    } else {
+                        // Successful 
+                        resolve({
+                            success: 'successfully set handler'
+                        });
+                    }
+                })
         })
     }
 
@@ -75,22 +69,23 @@ export class AppComponent  {
     });
   }
 
-  changeFeedback() {
-    this.feedback = 'hello'
+  changeFeedback(message: string) {
+    this.feedback = message
   }
 
   // Excel methods
   changeEvent(eventArgs: any) {
+      
       Excel.run(async (context) => {
             const data = [
-                ["Hello World"]
+                [eventArgs.binding.id]
             ];
       const range = context.workbook.getSelectedRange()
       range.values = data;
       await context.sync();
     });
-    // Handler cannot run this
-    // this.changeFeedback(); 
+    // This won't run for some reason?
+    this.changeFeedback('hello');
   }
 
   bindToWorkBook(): Promise<IOfficeResult> {
